@@ -1,0 +1,7 @@
+# pglogical_ticker extension
+comment = 'Have an accurate view on pglogical replication delay'
+default_version = '1.3'
+schema = 'pglogical_ticker'
+module_pathname = '$libdir/pglogical_ticker'
+requires = 'pglogical'
+relocatable = false

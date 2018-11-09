@@ -1,0 +1,29 @@
+pglogical-ticker (1.3.0-1) unstable; urgency=medium
+
+  * Support pg11 
+
+ -- Jeremy Finzel <jfinzel@enova.com>  Mon, 22 Oct 2018 12:11:44 -0500 
+
+pglogical-ticker (1.2.0-1) unstable; urgency=medium
+
+  * Add new replication sets without breakage and support cascading rep 
+
+ -- Jeremy Finzel <jfinzel@enova.com>  Mon, 30 Jul 2018 12:36:10 -0500 
+
+pglogical-ticker (1.1.0-2) unstable; urgency=medium
+
+  * Compile each version with correct PG version library 
+
+ -- Jeremy Finzel <jfinzel@enova.com>  Thu, 28 Jun 2018 16:53:13 -0500 
+
+pglogical-ticker (1.1.0-1) unstable; urgency=medium
+
+  * Version 1.1.0 from upstream.
+
+ -- Jeremy Finzel <jfinzel@enova.com>  Wed, 27 Jun 2018 14:20:51 -0500 
+
+pglogical-ticker (1.0.0-1) unstable; urgency=medium
+
+  * Version 1.0.0 from upstream.
+
+ -- Dominic Salvador <dsalvador@enova.com>  Mon, 30 Apr 2018 00:00:00 -0500 

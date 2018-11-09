@@ -1,0 +1,6 @@
+SELECT pglogical_ticker.add_ticker_tables_to_replication();
+ add_ticker_tables_to_replication 
+----------------------------------
+                               11
+(1 row)
+

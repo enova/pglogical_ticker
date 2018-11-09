@@ -1,0 +1,51 @@
+SET client_min_messages TO WARNING;
+--Verify manual usage of tick function
+SELECT pglogical_ticker.tick();
+ tick 
+------
+ 
+(1 row)
+
+DROP TABLE IF EXISTS checkit;
+CREATE TEMP TABLE checkit AS
+SELECT * FROM pglogical_ticker.test1;
+SELECT pglogical_ticker.tick();
+ tick 
+------
+ 
+(1 row)
+
+SELECT (SELECT source_time FROM pglogical_ticker.test1) > (SELECT source_time FROM checkit) AS time_went_up;
+ time_went_up 
+--------------
+ t
+(1 row)
+
+SELECT pglogical_ticker.tick();
+ tick 
+------
+ 
+(1 row)
+
+SELECT provider_name, set_name, source_time IS NOT NULL AS source_time_is_populated FROM pglogical_ticker.all_repset_tickers();
+ provider_name |      set_name       | source_time_is_populated 
+---------------+---------------------+--------------------------
+ test          | default_insert_only | t
+ test          | ddl_sql             | t
+ test          | test1               | t
+ test          | test2               | t
+ test          | test3               | t
+ test          | test4               | t
+ test          | test5               | t
+ test          | test6               | t
+ test          | test7               | t
+ test          | test8               | t
+(10 rows)
+
+--This just is going to return nothing because no subscriptions exist.  Would be nice to figure out how to test that.
+SELECT provider_name, set_name, source_time IS NOT NULL AS source_time_is_populated FROM pglogical_ticker.all_subscription_tickers();
+ provider_name | set_name | source_time_is_populated 
+---------------+----------+--------------------------
+               |          | f
+(1 row)
+

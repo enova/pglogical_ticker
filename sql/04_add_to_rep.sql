@@ -1,0 +1,1 @@
+SELECT pglogical_ticker.add_ticker_tables_to_replication();

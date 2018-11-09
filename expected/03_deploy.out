@@ -1,0 +1,6 @@
+SELECT pglogical_ticker.deploy_ticker_tables();
+ deploy_ticker_tables 
+----------------------
+                   11
+(1 row)
+

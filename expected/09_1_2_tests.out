@@ -1,0 +1,119 @@
+SET client_min_messages TO warning;
+WITH sets AS (
+SELECT 'test'||generate_series AS set_name
+FROM generate_series(11,12)
+)
+SELECT pglogical.create_replication_set
+(set_name:=s.set_name
+,replicate_insert:=TRUE
+,replicate_update:=TRUE
+,replicate_delete:=TRUE
+,replicate_truncate:=TRUE) AS result
+INTO TEMP repsets
+FROM sets s
+WHERE NOT EXISTS (
+SELECT 1
+FROM pglogical.replication_set
+WHERE set_name = s.set_name);
+DROP TABLE repsets;
+/*** PRIOR TO 1.2, THIS WOULD SHOW THE FOLLOWING ERROR
+
+ERROR:  relation "pglogical_ticker.test11" does not exist
+LINE 2:     INSERT INTO pglogical_ticker.test11 (provider_name, sour...
+                        ^
+QUERY:
+    INSERT INTO pglogical_ticker.test11 (provider_name, source_time)
+    SELECT ni.if_name, now() AS source_time
+    FROM pglogical.replication_set rs
+    INNER JOIN pglogical.node n ON n.node_id = rs.set_nodeid
+    INNER JOIN pglogical.node_interface ni ON ni.if_nodeid = n.node_id
+    WHERE rs.set_name = 'test11'
+    ON CONFLICT (provider_name)
+    DO UPDATE
+    SET source_time = now();
+
+CONTEXT:  PL/pgSQL function pglogical_ticker.tick() line 23 at EXECUTE
+
+***/
+SELECT pglogical_ticker.tick();
+ tick 
+------
+ 
+(1 row)
+
+SELECT * FROM pglogical_ticker.eligible_tickers() ORDER BY set_name, tablename;
+      set_name       |      tablename      
+---------------------+---------------------
+ ddl_sql             | ddl_sql
+ default             | default
+ default_insert_only | default_insert_only
+ test1               | test1
+ test10              | test10
+ test11              | test11
+ test12              | test12
+ test2               | test2
+ test3               | test3
+ test4               | test4
+ test5               | test5
+ test6               | test6
+ test7               | test7
+ test8               | test8
+ test9               | test9
+(15 rows)
+
+SELECT * FROM pglogical_ticker.eligible_tickers('test1') ORDER BY set_name, tablename;
+ set_name |      tablename      
+----------+---------------------
+ test1    | ddl_sql
+ test1    | default
+ test1    | default_insert_only
+ test1    | test1
+ test1    | test10
+ test1    | test2
+ test1    | test3
+ test1    | test4
+ test1    | test5
+ test1    | test6
+ test1    | test7
+ test1    | test8
+ test1    | test9
+(13 rows)
+
+SELECT pglogical_ticker.deploy_ticker_tables('test1');
+ deploy_ticker_tables 
+----------------------
+                   13
+(1 row)
+
+SELECT pglogical_ticker.add_ticker_tables_to_replication('test1');
+ add_ticker_tables_to_replication 
+----------------------------------
+                               12
+(1 row)
+
+SELECT set_name, set_reloid
+FROM pglogical_ticker.rep_set_table_wrapper() rst
+INNER JOIN pglogical.replication_set rs USING (set_id)
+WHERE set_name = 'test1'
+ORDER BY set_name, set_reloid::TEXT; 
+ set_name |              set_reloid              
+----------+--------------------------------------
+ test1    | pglogical_ticker.ddl_sql
+ test1    | pglogical_ticker."default"
+ test1    | pglogical_ticker.default_insert_only
+ test1    | pglogical_ticker.test1
+ test1    | pglogical_ticker.test10
+ test1    | pglogical_ticker.test2
+ test1    | pglogical_ticker.test3
+ test1    | pglogical_ticker.test4
+ test1    | pglogical_ticker.test5
+ test1    | pglogical_ticker.test6
+ test1    | pglogical_ticker.test7
+ test1    | pglogical_ticker.test8
+ test1    | pglogical_ticker.test9
+(13 rows)
+
+--tables are extension members
+DROP TABLE pglogical_ticker.test1;
+ERROR:  cannot drop table pglogical_ticker.test1 because extension pglogical_ticker requires it
+HINT:  You can drop extension pglogical_ticker instead.
