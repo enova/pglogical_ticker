@@ -25,3 +25,9 @@ Depends: postgresql-10, postgresql-10-pglogical, ${shlibs:Depends}, ${misc:Depen
 Description: Have time-based replication delay for pglogical
  A pglogical extension to obtain time-based replication delay for PostgreSQL 10.
 
+Package: postgresql-11-pglogical-ticker
+Architecture: any
+Depends: postgresql-11, postgresql-11-pglogical, ${shlibs:Depends}, ${misc:Depends}
+Description: Have time-based replication delay for pglogical
+ A pglogical extension to obtain time-based replication delay for PostgreSQL 11.
+
