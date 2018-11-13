@@ -49,7 +49,9 @@ SELECT pglogical_ticker.add_ticker_tables_to_replication('test1');
 SELECT set_name, set_reloid
 FROM pglogical_ticker.rep_set_table_wrapper() rst
 INNER JOIN pglogical.replication_set rs USING (set_id)
-WHERE set_name = 'test1'
+INNER JOIN pg_class c ON c.oid = rst.set_reloid
+-- There is a sorting indeterminacy with quoted table name.  So just ignore the 'default' table
+WHERE set_name = 'test1' AND c.relname <> 'default'
 ORDER BY set_name, set_reloid::TEXT; 
 
 --tables are extension members
