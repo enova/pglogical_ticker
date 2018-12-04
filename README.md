@@ -6,8 +6,14 @@ worker to get replication time from standpoint of pglogical provider.
 # How to use pglogical_ticker
 
 ### Installation
+
 The functionality of this requires postgres 9.5+ and a working install of
-pglogical. Packages will be available soon. To build from source:
+pglogical.
+
+DEB available on official PGDG repository as postgresql-${PGSQL_VERSION}-pglogical-ticker.
+See installation instruction on https://wiki.postgresql.org/wiki/Apt
+
+Or to build from source:
 ```
 make
 make install
