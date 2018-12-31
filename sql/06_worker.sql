@@ -21,6 +21,9 @@ SELECT (SELECT source_time FROM pglogical_ticker.test2) > (SELECT source_time FR
 SELECT pg_cancel_backend(pid)
 FROM worker_pid;
 
+-- Give it time to die asynchronously
+SELECT pg_sleep(2);
+
 --Try the launch_if_repset_tables function
 DROP TABLE worker_pid;
 CREATE TEMP TABLE worker_pid AS

@@ -22,6 +22,9 @@ SELECT pglogical_ticker.launch() AS pid;
 
 ALTER FUNCTION pglogical_ticker.tick_oops() RENAME TO tick;
 
+-- Give it time to die asynchronously
+SELECT pg_sleep(2);
+
 --Verify we can't start multiple workers - the second attempt should return NULL
 --We know this is imperfect but so long as pglogical_ticker.launch is not executed
 --at the same exact moment this is good enough insurance for now.
