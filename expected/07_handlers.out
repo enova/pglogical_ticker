@@ -17,7 +17,6 @@ ALTER FUNCTION pglogical_ticker.tick() RENAME TO tick_oops;
 DROP TABLE IF EXISTS bad_pid_2;
 CREATE TEMP TABLE bad_pid_2 AS
 SELECT pglogical_ticker.launch() AS pid;
-ALTER FUNCTION pglogical_ticker.tick_oops() RENAME TO tick;
 -- Give it time to die asynchronously
 SELECT pg_sleep(2);
  pg_sleep 
@@ -25,11 +24,13 @@ SELECT pg_sleep(2);
  
 (1 row)
 
+-- Fix it
+ALTER FUNCTION pglogical_ticker.tick_oops() RENAME TO tick;
 --Verify we can't start multiple workers - the second attempt should return NULL
 --We know this is imperfect but so long as pglogical_ticker.launch is not executed
 --at the same exact moment this is good enough insurance for now.
 --Also, multiple workers still could be running without any bad side effects.
---Should be false
+--Should be false because the process should start OK
 SELECT pglogical_ticker.launch() IS NULL AS pid;
  pid 
 -----
@@ -42,7 +43,7 @@ SELECT pg_sleep(1);
  
 (1 row)
 
---Should be true
+--Should be true because we already have one running
 SELECT pglogical_ticker.launch() IS NULL AS next_attempt_no_pid;
  next_attempt_no_pid 
 ---------------------
