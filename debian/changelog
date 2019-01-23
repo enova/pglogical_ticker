@@ -1,3 +1,9 @@
+pglogical-ticker (1.3.1-1) unstable; urgency=medium
+
+  * Fix race conditions in tests
+
+ -- Jeremy Finzel <jfinzel@enova.com>  Wed, 23 Jan 2019 09:56:09 -0600 
+ 
 pglogical-ticker (1.3.0-1) unstable; urgency=medium
 
   * Support pg11 
