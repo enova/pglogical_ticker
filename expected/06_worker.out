@@ -34,6 +34,13 @@ FROM worker_pid;
  t
 (1 row)
 
+-- Give it time to die asynchronously
+SELECT pg_sleep(2);
+ pg_sleep 
+----------
+ 
+(1 row)
+
 --Try the launch_if_repset_tables function
 DROP TABLE worker_pid;
 CREATE TEMP TABLE worker_pid AS
