@@ -2,8 +2,8 @@
 
 set -eu
 
-last_version=1.2
-new_version=1.3
+last_version=1.3
+new_version=1.4
 last_version_file=pglogical_ticker--${last_version}.sql
 new_version_file=pglogical_ticker--${new_version}.sql
 update_file=pglogical_ticker--${last_version}--${new_version}.sql
