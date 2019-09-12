@@ -11,4 +11,4 @@ Package: postgresql-PGVERSION-pglogical-ticker
 Architecture: any
 Depends: postgresql-PGVERSION, postgresql-PGVERSION-pglogical, ${shlibs:Depends}, ${misc:Depends}
 Description: Have time-based replication delay for pglogical
- A pglogical extension to obtain time-based replication delay for PostgreSQL PGVERSION.
+ A pglogical extension to get time-based replication delay for PostgreSQL PGVERSION.
