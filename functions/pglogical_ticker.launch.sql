@@ -12,7 +12,7 @@ AND NOT EXISTS
     (SELECT 1
     FROM pg_stat_activity psa
     WHERE NOT pid = pg_backend_pid()
-      AND query = 'SELECT pglogical_ticker.tick();')
+      AND application_name LIKE 'pglogical_ticker%')
 AND NOT pg_is_in_recovery();
 $function$
 ;

@@ -33,9 +33,10 @@ d=$2
 (cat "${s}"; echo; echo) >> "$d"
 }
 
-#create_update_file_with_header
+create_update_file_with_header
 
 # Add view and function changes
+add_file functions/pglogical_ticker.launch.sql $update_file
 
 # Only copy diff and new files after last version, and add the update script
 touch $update_file
