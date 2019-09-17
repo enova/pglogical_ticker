@@ -9,7 +9,8 @@ EXTENSION = pglogical_ticker
 DATA = pglogical_ticker--1.0.sql pglogical_ticker--1.0--1.1.sql \
         pglogical_ticker--1.1.sql pglogical_ticker--1.1--1.2.sql \
         pglogical_ticker--1.2.sql pglogical_ticker--1.2--1.3.sql \
-        pglogical_ticker--1.3.sql
+        pglogical_ticker--1.3.sql pglogical_ticker--1.3--1.4.sql \
+        pglogical_ticker--1.4.sql
 PGFILEDESC = "pglogical_ticker - Have an accurate view of pglogical replication delay"
 
 PG_CONFIG = pg_config

@@ -1,3 +1,8 @@
+/* pglogical_ticker--1.3--1.4.sql */
+
+-- complain if script is sourced in psql, rather than via CREATE EXTENSION
+\echo Use "CREATE EXTENSION pglogical_ticker" to load this file. \quit
+
 CREATE OR REPLACE FUNCTION pglogical_ticker.launch()
  RETURNS integer
  LANGUAGE sql
@@ -16,3 +21,5 @@ AND NOT EXISTS
 AND NOT pg_is_in_recovery();
 $function$
 ;
+
+

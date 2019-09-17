@@ -20,12 +20,19 @@ make install
 make installcheck # run regression suite
 ```
 
+Although not strictly required, to get access to the configuration settings of
+`pglogical_ticker` and to auto-launch the ticker on server restart or a soft crash,
+add `pglogical_ticker` to `shared_preload_libraries` in your postgresql.conf file:
+```
+shared_preload_libraries = 'pglogical,pglogical_ticker' #... and whatever others you already may have
+```
+
 Once installed, simply run this on the provider and all subscribers:
 ```sql
 CREATE EXTENSION pglogical_ticker;
 ```
 
-### Deploy tables and launch ticker
+### Deploy ticker tables
 Deploy the ticker tables. Run this command on the provider only, which
 will use `pglogical.replicate_ddl_command` to send to subscriber.
 ```sql
@@ -58,22 +65,39 @@ You can manually try the tick() function if you so choose:
 SELECT pglogical_ticker.tick();
 ```
 
-TO LAUNCH THE BACKGROUND WORKER:
+### Configuration
+This is only supported if you have added `pglogical_ticker` in `shared_preload_libraries`
+as noted above.
+
+- `pglogical_ticker.database`: The database in which to launch the ticker (we currently
+    have no need to support multiple databases, but may add that feature at a later time).
+    The ticker will only auto-launch on restart if this setting is configured.
+- `pglogical_ticker.naptime`: How frequently the ticker ticks - default 10 seconds
+- `pglogical_ticker.restart_time`: How many seconds before the ticker auto-restarts, default 10.  This
+    is also how long it will take to re-launch after a soft crash, for instance. Set this to
+    -1 to disable.  **Be aware** that you cannot use this setting to prevent an already-launched
+    ticker from restarting.  Only a server restart will take this new value into account for
+    the ticker backend and prevent it from ever restarting, if that is your desired behavior.
+
+### Launching the ticker
+As of version 1.4, the ticker will automatically launch upon server load
+if you have `pglogical_ticker` in `shared_preload_libraries`.
+
+Otherwise, this function will launch the ticker, only if there is not already
+one running:
 ```sql
 SELECT pglogical_ticker.launch();
 
 /**
-It is better to use this function always, which automatically checks if
+It is better to use the following function instead, which automatically checks if
 the system should have a ticker based on tables existing in replication.
 (this assumes you don't want a replication stream open with no tables).
-
-This function is very useful if you want to just blindly run the function
-to launch the ticker if it needs to be launched, i.e. after a restart.
 **/
 SELECT pglogical_ticker.launch_if_repset_tables();
 ```
 
-This will run the function `pglogical_ticker.tick()` every 10 seconds.
+The background worker launched either by this function or upon server load will
+run the function `pglogical_ticker.tick()` every n seconds according to `pglogical_ticker.naptime`. 
 
 Be sure to use caution in monitoring deployment and running of these background
 worker processes.
@@ -95,10 +119,13 @@ SELECT * FROM pglogical_ticker.all_subscription_tickers();
 Help is always wanted to review and improve the BackgroundWorker module.
 It is directly based on `worker_spi` from Postgres' test suite.
 
-It could be improved to take arguments for naptime and also a different
-username.  I would also like it to be written so as to prevent any 
-possibility of launching more than one worker, which currently is only
-done through the exposed function in the docs `launch()`.
+It could be improved to use a different username.  I would also like it to
+be written so as to prevent any possibility of launching more than one worker,
+which currently is only done through the exposed function in the docs `launch()`.
+
+As of 1.4, I'm also interested in allowing a clean shutdown with exit code 0,
+as well as (if safe enough) searching databases for the ticker as opposed to having
+to configure `pglogical_ticker.database`.
 
 The SQL files are maintained separately to make version control much
 easier to see.  Make changes in these folders and then run

@@ -34,6 +34,7 @@ PG_MODULE_MAGIC;
 
 PG_FUNCTION_INFO_V1(pglogical_ticker_launch);
 
+void		_PG_init(void);
 void		pglogical_ticker_main(Datum) pg_attribute_noreturn();
 
 /* flags set by signal handlers */
@@ -41,7 +42,12 @@ static volatile sig_atomic_t got_sighup = false;
 static volatile sig_atomic_t got_sigterm = false;
 
 /* GUC variables */
-static int  ticker_naptime = 10;
+static int  pglogical_ticker_naptime = 10;
+static char *pglogical_ticker_database;
+static int  pglogical_ticker_restart_time = 10;
+
+/* Constants */
+static int  pglogical_ticker_total_workers = 1;
 
 /*
  * Signal handler for SIGTERM
@@ -90,18 +96,31 @@ pglogical_ticker_main(Datum main_arg)
 	BackgroundWorkerUnblockSignals();
 
 	/* Connect to our database */
+	if (pglogical_ticker_database != NULL)
+	{
 #if PG_VERSION_NUM >= 110000 
-	BackgroundWorkerInitializeConnectionByOid(db_oid_main, InvalidOid, 0);
+		BackgroundWorkerInitializeConnection(pglogical_ticker_database, NULL, 0); 
 #else
-	BackgroundWorkerInitializeConnectionByOid(db_oid_main, InvalidOid);
+		BackgroundWorkerInitializeConnection(pglogical_ticker_database, NULL);
 #endif
+	}
+	else
+	{
+#if PG_VERSION_NUM >= 110000 
+		BackgroundWorkerInitializeConnectionByOid(db_oid_main, InvalidOid, 0);
+#else
+		BackgroundWorkerInitializeConnectionByOid(db_oid_main, InvalidOid);
+#endif
+	}
+	SetConfigOption("application_name", MyBgworkerEntry->bgw_name,
+			PGC_USERSET, PGC_S_SESSION);
 
 	elog(LOG, "%s initialized",
-		 MyBgworkerEntry->bgw_name);
+			MyBgworkerEntry->bgw_name);
 
 	initStringInfo(&buf);
 	appendStringInfo(&buf,
-					 "SELECT pglogical_ticker.tick();");
+			"SELECT pglogical_ticker.tick();");
 
 	/*
 	 * Main loop: do this until the SIGTERM handler tells us to terminate
@@ -118,13 +137,13 @@ pglogical_ticker_main(Datum main_arg)
 		 */
 #if PG_VERSION_NUM >= 100000 
 		rc = WaitLatch(MyLatch,
-					   WL_LATCH_SET | WL_TIMEOUT | WL_POSTMASTER_DEATH,
-					   ticker_naptime * 1000L,
-					   PG_WAIT_EXTENSION);
+				WL_LATCH_SET | WL_TIMEOUT | WL_POSTMASTER_DEATH,
+				pglogical_ticker_naptime * 1000L,
+				PG_WAIT_EXTENSION);
 #else
 		rc = WaitLatch(MyLatch,
-					   WL_LATCH_SET | WL_TIMEOUT | WL_POSTMASTER_DEATH,
-					   ticker_naptime * 1000L);
+				WL_LATCH_SET | WL_TIMEOUT | WL_POSTMASTER_DEATH,
+				pglogical_ticker_naptime * 1000L);
 #endif
 		ResetLatch(MyLatch);
 
@@ -177,8 +196,93 @@ pglogical_ticker_main(Datum main_arg)
 		pgstat_report_stat(false);
 		pgstat_report_activity(STATE_IDLE, NULL);
 	}
-
+	
 	proc_exit(1);
+}
+
+/*
+ * Entrypoint of this module.
+ *
+ * We register more than one worker process here, to demonstrate how that can
+ * be done.
+ */
+void
+_PG_init(void)
+{
+	BackgroundWorker worker;
+	unsigned int i;
+
+	/* get the configuration */
+	DefineCustomIntVariable("pglogical_ticker.naptime",
+			"Duration between each tick (in seconds).",
+			NULL,
+			&pglogical_ticker_naptime,
+			pglogical_ticker_naptime,
+			1,
+			INT_MAX,
+			PGC_SIGHUP,
+			0,
+			NULL,
+			NULL,
+			NULL);
+
+
+	DefineCustomStringVariable("pglogical_ticker.database",
+			"Database to connect to.",
+			NULL,
+			&pglogical_ticker_database,
+			pglogical_ticker_database,
+			PGC_SIGHUP,
+			0,
+			NULL,
+			NULL,
+			NULL);
+
+	DefineCustomIntVariable("pglogical_ticker.restart_time",
+			"Seconds after which to restart ticker if it dies. -1 to disable",
+			NULL,
+			&pglogical_ticker_restart_time,
+			pglogical_ticker_restart_time,
+			-1,
+			INT_MAX,
+			PGC_SIGHUP,
+			0,
+			NULL,
+			NULL,
+			NULL);
+
+	if (!process_shared_preload_libraries_in_progress)
+		return;
+
+
+	/* Only auto-start worker if pglogical_ticker_database is set */
+	if (pglogical_ticker_database)
+	{
+		/* set up common data for all our workers */
+		memset(&worker, 0, sizeof(worker));
+		worker.bgw_flags = BGWORKER_SHMEM_ACCESS |
+			BGWORKER_BACKEND_DATABASE_CONNECTION;
+		worker.bgw_start_time = BgWorkerStart_RecoveryFinished;
+		worker.bgw_restart_time = pglogical_ticker_restart_time;
+		sprintf(worker.bgw_library_name, "pglogical_ticker");
+		sprintf(worker.bgw_function_name, "pglogical_ticker_main");
+		worker.bgw_notify_pid = 0;
+
+		/*
+		 * Now fill in worker-specific data, and do the actual registrations.
+		 */
+		for (i = 1; i <= pglogical_ticker_total_workers; i++)
+		{
+			snprintf(worker.bgw_name, BGW_MAXLEN, "pglogical_ticker worker %d", i);
+#if PG_VERSION_NUM >= 110000 
+			snprintf(worker.bgw_type, BGW_MAXLEN, "pglogical_ticker");
+#endif
+			/* Hack to use postgres db oid until we do something smarter */
+			worker.bgw_main_arg = Int32GetDatum(0);
+
+			RegisterBackgroundWorker(&worker);
+		}
+	}
 }
 
 /*
@@ -187,7 +291,7 @@ pglogical_ticker_main(Datum main_arg)
 Datum
 pglogical_ticker_launch(PG_FUNCTION_ARGS)
 {
-	Oid         db_oid = PG_GETARG_OID(0);
+	Oid		 db_oid = PG_GETARG_OID(0);
 	BackgroundWorker worker;
 	BackgroundWorkerHandle *handle;
 	BgwHandleStatus status;
@@ -197,7 +301,7 @@ pglogical_ticker_launch(PG_FUNCTION_ARGS)
 	worker.bgw_flags = BGWORKER_SHMEM_ACCESS |
 		BGWORKER_BACKEND_DATABASE_CONNECTION;
 	worker.bgw_start_time = BgWorkerStart_RecoveryFinished;
-	worker.bgw_restart_time = BGW_NEVER_RESTART;
+	worker.bgw_restart_time = pglogical_ticker_restart_time;
 	sprintf(worker.bgw_library_name, "pglogical_ticker");
 	sprintf(worker.bgw_function_name, "pglogical_ticker_main");
 	snprintf(worker.bgw_name, BGW_MAXLEN, "pglogical_ticker worker");
