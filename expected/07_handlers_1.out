@@ -2,10 +2,10 @@
     There may be a race condition in WaitForBackgroundWorkerStartup that 
     leads to indeterminate behavior on a bad launch.
 
-    For this reason, we set log_min_messages to FATAL.  These tests then
+    For this reason, we set log_min_messages to ERROR.  These tests then
     really only ensure that the server lives OK during a bad launch.
 ***/
-SET client_min_messages TO FATAL;
+SET client_min_messages TO ERROR;
 --The _launch function is not supposed to be used directly
 --This tests that stupid things don't do something really bad
 DROP TABLE IF EXISTS bad_pid;
