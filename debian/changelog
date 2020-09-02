@@ -1,3 +1,9 @@
+pglogical-ticker (1.4.1-1) unstable; urgency=medium
+
+  * Test fixes for log_min_messages behavior change
+
+ -- Jeremy Finzel <jfinzel@enova.com>  Wed, 02 Sep 2020 12:37:10 -0500
+
 pglogical-ticker (1.4.0-1) unstable; urgency=medium
 
   * Support ticker auto-restart 
