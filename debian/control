@@ -11,23 +11,34 @@ Package: postgresql-9.5-pglogical-ticker
 Architecture: any
 Depends: postgresql-9.5, postgresql-9.5-pglogical, ${shlibs:Depends}, ${misc:Depends}
 Description: Have time-based replication delay for pglogical
- A pglogical extension to obtain time-based replication delay for PostgreSQL 9.5.
+ A pglogical extension to get time-based replication delay for PostgreSQL 9.5.
 
 Package: postgresql-9.6-pglogical-ticker
 Architecture: any
 Depends: postgresql-9.6, postgresql-9.6-pglogical, ${shlibs:Depends}, ${misc:Depends}
 Description: Have time-based replication delay for pglogical
- A pglogical extension to obtain time-based replication delay for PostgreSQL 9.6.
+ A pglogical extension to get time-based replication delay for PostgreSQL 9.6.
 
 Package: postgresql-10-pglogical-ticker
 Architecture: any
 Depends: postgresql-10, postgresql-10-pglogical, ${shlibs:Depends}, ${misc:Depends}
 Description: Have time-based replication delay for pglogical
- A pglogical extension to obtain time-based replication delay for PostgreSQL 10.
+ A pglogical extension to get time-based replication delay for PostgreSQL 10.
 
 Package: postgresql-11-pglogical-ticker
 Architecture: any
 Depends: postgresql-11, postgresql-11-pglogical, ${shlibs:Depends}, ${misc:Depends}
 Description: Have time-based replication delay for pglogical
- A pglogical extension to obtain time-based replication delay for PostgreSQL 11.
+ A pglogical extension to get time-based replication delay for PostgreSQL 11.
 
+Package: postgresql-12-pglogical-ticker
+Architecture: any
+Depends: postgresql-12, postgresql-12-pglogical, ${shlibs:Depends}, ${misc:Depends}
+Description: Have time-based replication delay for pglogical
+ A pglogical extension to get time-based replication delay for PostgreSQL 12.
+
+Package: postgresql-13-pglogical-ticker
+Architecture: any
+Depends: postgresql-13, postgresql-13-pglogical, ${shlibs:Depends}, ${misc:Depends}
+Description: Have time-based replication delay for pglogical
+ A pglogical extension to get time-based replication delay for PostgreSQL 13.

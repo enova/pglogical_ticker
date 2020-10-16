@@ -1,3 +1,9 @@
+pglogical-ticker (1.4.1-2) unstable; urgency=medium
+
+  * Team upload for PostgreSQL 13.
+
+ -- Christoph Berg <myon@debian.org>  Fri, 16 Oct 2020 13:08:12 +0200
+
 pglogical-ticker (1.4.1-1) unstable; urgency=medium
 
   * Test fixes for log_min_messages behavior change
