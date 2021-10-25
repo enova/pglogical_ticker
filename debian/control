@@ -8,8 +8,8 @@ Rules-Requires-Root: no
 Homepage: https://github.com/enova/pglogical_ticker
 Vcs-Git: https://github.com/enova/pglogical_ticker.git
 
-Package: postgresql-13-pglogical-ticker
+Package: postgresql-14-pglogical-ticker
 Architecture: any
-Depends: postgresql-13, postgresql-13-pglogical, ${shlibs:Depends}, ${misc:Depends}
+Depends: postgresql-14, postgresql-14-pglogical, ${shlibs:Depends}, ${misc:Depends}
 Description: Have time-based replication delay for pglogical
- A pglogical extension to get time-based replication delay for PostgreSQL 13.
+ A pglogical extension to get time-based replication delay for PostgreSQL 14.
