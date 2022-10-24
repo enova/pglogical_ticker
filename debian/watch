@@ -1,2 +1,2 @@
 version=4
-https://github.com/enova/pglogical_ticker/releases .*/v(.*).tar.gz
+https://github.com/enova/pglogical_ticker/tags .*/v(.*).tar.gz
