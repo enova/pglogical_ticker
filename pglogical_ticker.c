@@ -10,7 +10,6 @@
 /* These are always necessary for a bgworker */
 #include "miscadmin.h"
 #include "postmaster/bgworker.h"
-#include "storage/backendid.h"
 #include "storage/ipc.h"
 #include "storage/latch.h"
 #include "storage/lwlock.h"
@@ -35,7 +34,7 @@ PG_MODULE_MAGIC;
 PG_FUNCTION_INFO_V1(pglogical_ticker_launch);
 
 PGDLLEXPORT void		_PG_init(void);
-PGDLLEXPORT void		pglogical_ticker_main(Datum) pg_attribute_noreturn();
+PGDLLEXPORT void		pglogical_ticker_main(Datum main_arg);
 
 /* flags set by signal handlers */
 static volatile sig_atomic_t got_sighup = false;
