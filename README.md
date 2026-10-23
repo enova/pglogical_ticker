@@ -11,7 +11,7 @@ The functionality of this requires postgres 9.5+ and a working install of
 pglogical.
 
 DEB available on official PGDG repository as postgresql-${PGSQL_VERSION}-pglogical-ticker.
-See installation instruction on https://wiki.postgresql.org/wiki/Apt
+See installation instructions on https://wiki.postgresql.org/wiki/Apt
 
 Or to build from source:
 ```
@@ -34,14 +34,14 @@ CREATE EXTENSION pglogical_ticker;
 
 ### Deploy ticker tables
 Deploy the ticker tables. Run this command on the provider only, which
-will use `pglogical.replicate_ddl_command` to send to subscriber.
+will use `pglogical.replicate_ddl_command` to send to subscribers.
 ```sql
 SELECT pglogical_ticker.deploy_ticker_tables();
 ```
 This will add a table for each replication_set.
 
 For cascading replication, you can add existing tables to another
-replication set, that belonging to your 2nd tier subscriber.  You pass
+replication set, that belongs to your 2nd tier subscriber.  You pass
 that set_name to the `deploy` function like so:
 ```sql
 SELECT pglogical_ticker.deploy_ticker_tables('my_cascaded_set_name');
